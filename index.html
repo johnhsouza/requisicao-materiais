@@ -1,0 +1,2313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Requisição de Materiais</title>
+  <meta name="format-detection" content="telephone=no">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f2f5f3;
+      color: #1f2933;
+    }
+
+    header {
+      background: #079447;
+      color: white;
+      padding: 22px 16px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      font-size: 14px;
+    }
+
+    main {
+      width: min(1100px, 94%);
+      margin: 20px auto 50px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #087f40;
+      font-size: 19px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 10px 0 5px;
+      font-size: 14px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid #cbd5d1;
+      border-radius: 7px;
+      padding: 11px;
+      font-size: 15px;
+      background: white;
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .acoes {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 7px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .btn-verde {
+      background: #079447;
+      color: white;
+    }
+
+    .btn-verde:hover {
+      background: #06783a;
+    }
+
+    .btn-cinza {
+      background: #e5e7eb;
+      color: #1f2933;
+    }
+
+    .btn-vermelho {
+      background: #dc2626;
+      color: white;
+    }
+
+    .barra {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .contador {
+      margin: 10px 0;
+      font-weight: bold;
+      color: #087f40;
+    }
+
+    .lista {
+      border: 1px solid #d7dfda;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 42px 120px 1fr 100px;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .item:last-child {
+      border-bottom: 0;
+    }
+
+    .item:nth-child(even) {
+      background: #f4f8e9;
+    }
+
+    .item input[type="checkbox"] {
+      appearance: auto;
+      -webkit-appearance: checkbox;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      min-height: 24px;
+      margin: 0;
+      cursor: pointer;
+      display: block;
+      opacity: 1;
+      position: relative;
+      z-index: 2;
+      accent-color: #079447;
+    }
+
+    .checkbox-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+      min-width: 32px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: rgba(7,148,71,.15);
+    }
+
+    .codigo {
+      font-weight: bold;
+      color: #374151;
+      font-size: 13px;
+    }
+
+    .descricao {
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+
+    .quantidade {
+      width: 100%;
+      padding: 8px;
+    }
+
+    .preview {
+      white-space: pre-wrap;
+      background: #f7faf8;
+      border: 1px solid #d7dfda;
+      border-radius: 8px;
+      padding: 15px;
+      min-height: 130px;
+      font-size: 14px;
+    }
+
+    .vazio {
+      padding: 25px;
+      text-align: center;
+      color: #6b7280;
+    }
+
+    .aviso {
+      padding: 12px;
+      border-radius: 7px;
+      margin-top: 10px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .sucesso {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .erro {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    @media (max-width: 750px) {
+      .grid,
+      .barra {
+        grid-template-columns: 1fr;
+      }
+
+      .item {
+        grid-template-columns: 35px 1fr;
+      }
+
+      .codigo {
+        grid-column: 2;
+      }
+
+      .descricao {
+        grid-column: 2;
+      }
+
+      .quantidade {
+        grid-column: 2;
+        max-width: 130px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Requisição de Materiais</h1>
+    <p>Marque os materiais necessários, informe as quantidades e envie a requisição pelo WhatsApp</p>
+  </header>
+
+  <main>
+
+    <section class="card">
+      <h2>1. Dados da requisição</h2>
+      <p>Preencha os dados do solicitante e, abaixo, marque os materiais necessários.</p>
+
+      <div class="grid">
+        <div>
+          <label for="solicitante">Solicitante</label>
+          <input id="solicitante" placeholder="Nome do solicitante">
+        </div>
+
+        <div>
+          <label for="setor">Setor / Ferramentaria</label>
+          <input id="setor" placeholder="Ex.: Ferramentaria Sinterização">
+        </div>
+
+        <div>
+          <label for="telefone">WhatsApp do almoxarifado</label>
+          <input id="telefone" placeholder="Ex.: 5531999999999">
+        </div>
+      </div>
+
+      <label for="observacao">Observação</label>
+      <textarea id="observacao" placeholder="Digite alguma observação, se necessário..."></textarea>
+    </section>
+
+    <section class="card">
+      <h2>2. Selecionar materiais</h2>
+
+      <div class="barra">
+        <input
+          id="pesquisa"
+          placeholder="Pesquisar por código ou descrição..."
+          oninput="renderizarMateriais()"
+        >
+
+        <select id="filtro" onchange="renderizarMateriais()">
+          <option value="todos">Todos os materiais</option>
+          <option value="selecionados">Somente selecionados</option>
+        </select>
+      </div>
+
+      <div id="contador" class="contador"></div>
+      <div id="listaMateriais" class="lista"></div>
+    </section>
+
+    <section class="card">
+      <h2>3. Conferência da requisição</h2>
+
+      <div id="preview" class="preview">
+        Nenhum material selecionado.
+      </div>
+
+      <div class="acoes">
+        <button class="btn-verde" onclick="enviarWhatsApp()">
+          Enviar pelo WhatsApp
+        </button>
+
+        <button class="btn-cinza" onclick="copiarMensagem()">
+          Copiar mensagem
+        </button>
+      </div>
+
+      <div id="mensagemEnvio" class="aviso"></div>
+    </section>
+
+  </main>
+
+  <script>
+    // Catálogo incorporado automaticamente a partir do arquivo "lista materiais.pdf".
+    // 426 materiais únicos já ficam disponíveis assim que o arquivo é aberto.
+    const materiais = [
+  {
+    "codigo": "15067341",
+    "descricao": "ABRACADEIRA AMAR CABO 190,00MM"
+  },
+  {
+    "codigo": "15129118",
+    "descricao": "ABRACADEIRA AMAR CABO 300,00MM"
+  },
+  {
+    "codigo": "15099605",
+    "descricao": "ABRACADEIRA AMAR CABO 535,00MM"
+  },
+  {
+    "codigo": "15078824",
+    "descricao": "ABRACADEIRA FIXACAO CABOS 1/2 A 1\""
+  },
+  {
+    "codigo": "15040794",
+    "descricao": "ABRACADEIRA FIXACAO CABOS 13,00 A 19,0*"
+  },
+  {
+    "codigo": "15040672",
+    "descricao": "ABRACADEIRA FIXACAO CABOS 19,00A27,00MM"
+  },
+  {
+    "codigo": "15100674",
+    "descricao": "ABRACADEIRA FIXACAO CABOS 25,00A38,00MM"
+  },
+  {
+    "codigo": "15060072",
+    "descricao": "ABRACADEIRA FIXACAO CABOS 9,00 A 13,00*"
+  },
+  {
+    "codigo": "15107190",
+    "descricao": "ACENDEDOR CONCHA 2640001 MACARICO CORTE"
+  },
+  {
+    "codigo": "15056786",
+    "descricao": "ADESIVO VEDA CALHA 280G"
+  },
+  {
+    "codigo": "15102888",
+    "descricao": "AGULHEIRO  P343 LIMPEZA BICOS 6A24MM"
+  },
+  {
+    "codigo": "15098704",
+    "descricao": "ALCOOL 70 GRAUS 1L AMBULATORIO"
+  },
+  {
+    "codigo": "15106291",
+    "descricao": "APITO PROFISSIONAL CROMADO 1 SOM"
+  },
+  {
+    "codigo": "15063849",
+    "descricao": "ARAME SOLDA 1,20MM AWS E71T-1 AWS A5.2*"
+  },
+  {
+    "codigo": "15135544",
+    "descricao": "ARAME SOLDA 1,20MM TUBULAR AWS E309L-T*"
+  },
+  {
+    "codigo": "15126736",
+    "descricao": "ARAME SOLDA 1,20MM TUBULAR COM PROTECA*"
+  },
+  {
+    "codigo": "15099873",
+    "descricao": "ARAME SOLDA 1,60MM TUBULAR AWS E71T-1C*"
+  },
+  {
+    "codigo": "15106021",
+    "descricao": "ARRUELA LISA GALV DN 1/2\" ASME B27.2"
+  },
+  {
+    "codigo": "15014392",
+    "descricao": "ARRUELA LISA GALV DN 5/8\""
+  },
+  {
+    "codigo": "15076506",
+    "descricao": "AVENTAL SEG CAMURCA 600X1200MM"
+  },
+  {
+    "codigo": "15132546",
+    "descricao": "BATERIA 1,5V D10X44MM TAM AAA ALCAL"
+  },
+  {
+    "codigo": "15084301",
+    "descricao": "BATERIA 1,5V D14X50MM TAM AA ALCAL"
+  },
+  {
+    "codigo": "15129026",
+    "descricao": "BATERIA 9V 625MA ALCAL"
+  },
+  {
+    "codigo": "15135140",
+    "descricao": "BICO CONTATO D1,20MM"
+  },
+  {
+    "codigo": "15040013",
+    "descricao": "BICO CORTE NUM 10 OXI/ACET"
+  },
+  {
+    "codigo": "15030706",
+    "descricao": "BICO CORTE NUM 12 OXI/ACET"
+  },
+  {
+    "codigo": "15131665",
+    "descricao": "BICO CORTE NUM 2 OXI/ACET COBRE"
+  },
+  {
+    "codigo": "15039898",
+    "descricao": "BICO CORTE NUM 4 OXI/ACET"
+  },
+  {
+    "codigo": "15102062",
+    "descricao": "BICO CORTE NUM 4 OXIPROP (GLP)"
+  },
+  {
+    "codigo": "15039902",
+    "descricao": "BICO CORTE NUM 6 OXI/ACET"
+  },
+  {
+    "codigo": "15102054",
+    "descricao": "BICO CORTE NUM 6 OXIPROP (GLP)"
+  },
+  {
+    "codigo": "15039910",
+    "descricao": "BICO CORTE NUM 8 OXI/ACET"
+  },
+  {
+    "codigo": "15078257",
+    "descricao": "BICO CORTE NUM 8 OXIPROP 50 - 100MM (GLP)"
+  },
+  {
+    "codigo": "15132677",
+    "descricao": "BLUSAO ANTICHAMA HIGIEN BRIM EXG"
+  },
+  {
+    "codigo": "15075833",
+    "descricao": "BLUSAO ANTICHAMA HIGIEN BRIM LINGOTAD G"
+  },
+  {
+    "codigo": "15075834",
+    "descricao": "BLUSAO ANTICHAMA HIGIEN BRIM LINGOTAD GG"
+  },
+  {
+    "codigo": "15075831",
+    "descricao": "BLUSAO ANTICHAMA HIGIEN BRIM LINGOTAD M"
+  },
+  {
+    "codigo": "15075794",
+    "descricao": "BLUSAO ANTICHAMA HIGIEN BRIM P"
+  },
+  {
+    "codigo": "15135897",
+    "descricao": "BLUSAO BRIM SEM TRATAMENTO EXG"
+  },
+  {
+    "codigo": "15135895",
+    "descricao": "BLUSAO BRIM SEM TRATAMENTO G"
+  },
+  {
+    "codigo": "15135896",
+    "descricao": "BLUSAO BRIM SEM TRATAMENTO GG"
+  },
+  {
+    "codigo": "15136478",
+    "descricao": "BLUSAO CHUVA NYLON EMBORRACHADO G"
+  },
+  {
+    "codigo": "15136481",
+    "descricao": "BLUSAO CHUVA NYLON EMBORRACHADO GG"
+  },
+  {
+    "codigo": "15136479",
+    "descricao": "BLUSAO CHUVA NYLON EMBORRACHADO M"
+  },
+  {
+    "codigo": "15136480",
+    "descricao": "BLUSAO CHUVA NYLON EMBORRACHADO P"
+  },
+  {
+    "codigo": "15136540",
+    "descricao": "BLUSAO VAQUETA GOLA VELCRO G"
+  },
+  {
+    "codigo": "15136541",
+    "descricao": "BLUSAO VAQUETA GOLA VELCRO GG"
+  },
+  {
+    "codigo": "15100115",
+    "descricao": "BOCAL SOLDA  TOCHA MIG SBME470"
+  },
+  {
+    "codigo": "15131476",
+    "descricao": "BOCAL SOLDA NR5 CERAMICA SU-17 / SU-26*"
+  },
+  {
+    "codigo": "15064141",
+    "descricao": "BOCAL SOLDA NR6 CERAMICA"
+  },
+  {
+    "codigo": "15130662",
+    "descricao": "BOCAL SOLDA NR7 CERAMICA SU-17 / SU-26*"
+  },
+  {
+    "codigo": "15131480",
+    "descricao": "BOCAL SOLDA NR8 CERAMICA SU-17 / SU-26*"
+  },
+  {
+    "codigo": "15089138",
+    "descricao": "BOLSA POLIES 600"
+  },
+  {
+    "codigo": "15127948",
+    "descricao": "BOLSA PORTA FERR LONA"
+  },
+  {
+    "codigo": "15136226",
+    "descricao": "BOLSA TNT"
+  },
+  {
+    "codigo": "15119376",
+    "descricao": "BOTA SEGURANCA 38 PVC CANO LONG BIQ ACO"
+  },
+  {
+    "codigo": "15105112",
+    "descricao": "BOTA SEGURANCA 39 PVC CANO LONG BIQ ACO"
+  },
+  {
+    "codigo": "15127630",
+    "descricao": "BOTA SEGURANCA 40 PVC CANO LONG BIQ ACO"
+  },
+  {
+    "codigo": "15105195",
+    "descricao": "BOTA SEGURANCA 41 PVC CANO LONG BIQ ACO"
+  },
+  {
+    "codigo": "15044582",
+    "descricao": "BOTA SEGURANCA 42 PVC CANO LONG BIQ ACO"
+  },
+  {
+    "codigo": "15105765",
+    "descricao": "BOTA SEGURANCA 43 PVC CANO LONG BIQ ACO"
+  },
+  {
+    "codigo": "15087095",
+    "descricao": "BOTA SEGURANCA 44 PVC CANO LONG BIQ ACO"
+  },
+  {
+    "codigo": "15122762",
+    "descricao": "BOTA SEGURANCA 45 PVC CANO LONG BIQ ACO"
+  },
+  {
+    "codigo": "15129039",
+    "descricao": "BOTINA SEG 34 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15136382",
+    "descricao": "BOTINA SEG 34 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15102113",
+    "descricao": "BOTINA SEG 35 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15136356",
+    "descricao": "BOTINA SEG 35 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15102112",
+    "descricao": "BOTINA SEG 36 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15136365",
+    "descricao": "BOTINA SEG 36 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15132867",
+    "descricao": "BOTINA SEG 37 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15136363",
+    "descricao": "BOTINA SEG 37 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15102103",
+    "descricao": "BOTINA SEG 38 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15135243",
+    "descricao": "BOTINA SEG 38 ELAST BIQ ACO AT"
+  },
+  {
+    "codigo": "15136362",
+    "descricao": "BOTINA SEG 38 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15102107",
+    "descricao": "BOTINA SEG 39 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15136358",
+    "descricao": "BOTINA SEG 39 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15102106",
+    "descricao": "BOTINA SEG 40 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15135239",
+    "descricao": "BOTINA SEG 40 ELAST BIQ ACO AT"
+  },
+  {
+    "codigo": "15136357",
+    "descricao": "BOTINA SEG 40 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15102105",
+    "descricao": "BOTINA SEG 41 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15136355",
+    "descricao": "BOTINA SEG 41 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15130938",
+    "descricao": "BOTINA SEG 42 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15135244",
+    "descricao": "BOTINA SEG 42 ELAST BIQ ACO AT"
+  },
+  {
+    "codigo": "15136354",
+    "descricao": "BOTINA SEG 42 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15102121",
+    "descricao": "BOTINA SEG 43 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15135242",
+    "descricao": "BOTINA SEG 43 ELAST BIQ ACO AT"
+  },
+  {
+    "codigo": "15136364",
+    "descricao": "BOTINA SEG 43 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15132868",
+    "descricao": "BOTINA SEG 44 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15106773",
+    "descricao": "BOTINA SEG 44 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15105197",
+    "descricao": "BOTINA SEG 45 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15120346",
+    "descricao": "BOTINA SEG 45 ELAST BIQ ACO AT"
+  },
+  {
+    "codigo": "15136359",
+    "descricao": "BOTINA SEG 45 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15102117",
+    "descricao": "BOTINA SEG 46 AMAR BIQ COMP MANOBR"
+  },
+  {
+    "codigo": "15136360",
+    "descricao": "BOTINA SEG 46 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15105291",
+    "descricao": "BOTINA SEG 47 ELAST BIQ ACO AT"
+  },
+  {
+    "codigo": "15135748",
+    "descricao": "BOTINA SEG 47 ELAST BIQ COMP"
+  },
+  {
+    "codigo": "15135720",
+    "descricao": "BOTINA SEG 48 VELC BIQ ACO ALTO FORNO"
+  },
+  {
+    "codigo": "15093109",
+    "descricao": "BOTINA SEGURANCA NR 48 ELETRICISTA"
+  },
+  {
+    "codigo": "15077178",
+    "descricao": "BROCA CILINDRICA 10,00MM DIN 338"
+  },
+  {
+    "codigo": "15077171",
+    "descricao": "BROCA CILINDRICA 12,00MM DIN 338"
+  },
+  {
+    "codigo": "15077172",
+    "descricao": "BROCA CILINDRICA 13,00MM DIN 338"
+  },
+  {
+    "codigo": "15077174",
+    "descricao": "BROCA CILINDRICA 14,00MM DIN 338"
+  },
+  {
+    "codigo": "15098223",
+    "descricao": "BROCA CILINDRICA 3,17MM"
+  },
+  {
+    "codigo": "15077158",
+    "descricao": "BROCA CILINDRICA 3,50MM DIN 338"
+  },
+  {
+    "codigo": "15077160",
+    "descricao": "BROCA CILINDRICA 4,00MM DIN 338"
+  },
+  {
+    "codigo": "15127994",
+    "descricao": "BROCA CILINDRICA 5,00MM DIN 338"
+  },
+  {
+    "codigo": "15077164",
+    "descricao": "BROCA CILINDRICA 6,00MM DIN 338"
+  },
+  {
+    "codigo": "15077165",
+    "descricao": "BROCA CILINDRICA 7,00MM DIN 338"
+  },
+  {
+    "codigo": "15077166",
+    "descricao": "BROCA CILINDRICA 8,00MM DIN 338"
+  },
+  {
+    "codigo": "15077167",
+    "descricao": "BROCA CILINDRICA 9,00MM DIN 338"
+  },
+  {
+    "codigo": "15136050",
+    "descricao": "BROCA HELICOIDAL CILINDRICA 11,00MM DI*"
+  },
+  {
+    "codigo": "15105358",
+    "descricao": "BROCA SDS PLUS CILINDRICA 10,00MM"
+  },
+  {
+    "codigo": "15136335",
+    "descricao": "CABO ACO 3/8\" 6X36 (AA) DIR"
+  },
+  {
+    "codigo": "15131281",
+    "descricao": "CADEADO LAT MAC 25MM DOUR"
+  },
+  {
+    "codigo": "15136453",
+    "descricao": "CALCA"
+  },
+  {
+    "codigo": "15075821",
+    "descricao": "CALCA ANTICHAMA HIGIEN BRIM 50"
+  },
+  {
+    "codigo": "15136164",
+    "descricao": "CALCA ANTICHAMA HIGIENIZAVEL BRIM 40"
+  },
+  {
+    "codigo": "15136163",
+    "descricao": "CALCA ANTICHAMA HIGIENIZAVEL BRIM 42"
+  },
+  {
+    "codigo": "15132675",
+    "descricao": "CALCA ANTICHAMA HIGIENIZAVEL BRIM 48"
+  },
+  {
+    "codigo": "15132667",
+    "descricao": "CALCA ELETRICISTA RISCO 2 38"
+  },
+  {
+    "codigo": "15101310",
+    "descricao": "CALCA ELETRICISTA RISCO 2 40"
+  },
+  {
+    "codigo": "15101319",
+    "descricao": "CALCA ELETRICISTA RISCO 2 42"
+  },
+  {
+    "codigo": "15101320",
+    "descricao": "CALCA ELETRICISTA RISCO 2 44"
+  },
+  {
+    "codigo": "15132666",
+    "descricao": "CALCA ELETRICISTA RISCO 2 46"
+  },
+  {
+    "codigo": "15124774",
+    "descricao": "CALCA ELETRICISTA RISCO 2 48"
+  },
+  {
+    "codigo": "15132662",
+    "descricao": "CALCA ELETRICISTA RISCO 2 50"
+  },
+  {
+    "codigo": "15101266",
+    "descricao": "CALCA ELETRICISTA RISCO 2 52"
+  },
+  {
+    "codigo": "15122563",
+    "descricao": "CALCA ELETRICISTA RISCO 2 54"
+  },
+  {
+    "codigo": "15122564",
+    "descricao": "CALCA ELETRICISTA RISCO 2 56"
+  },
+  {
+    "codigo": "15122565",
+    "descricao": "CALCA ELETRICISTA RISCO 2 58"
+  },
+  {
+    "codigo": "15131746",
+    "descricao": "CALCA GESTANTE JEANS 38"
+  },
+  {
+    "codigo": "15131747",
+    "descricao": "CALCA GESTANTE JEANS 40"
+  },
+  {
+    "codigo": "15131748",
+    "descricao": "CALCA GESTANTE JEANS 42"
+  },
+  {
+    "codigo": "15131749",
+    "descricao": "CALCA GESTANTE JEANS 44"
+  },
+  {
+    "codigo": "15131750",
+    "descricao": "CALCA GESTANTE JEANS 46"
+  },
+  {
+    "codigo": "15131751",
+    "descricao": "CALCA GESTANTE JEANS 48"
+  },
+  {
+    "codigo": "15131752",
+    "descricao": "CALCA GESTANTE JEANS 50"
+  },
+  {
+    "codigo": "15131753",
+    "descricao": "CALCA GESTANTE JEANS 52"
+  },
+  {
+    "codigo": "15131754",
+    "descricao": "CALCA GESTANTE JEANS 54"
+  },
+  {
+    "codigo": "15131755",
+    "descricao": "CALCA GESTANTE JEANS 56"
+  },
+  {
+    "codigo": "15131756",
+    "descricao": "CALCA GESTANTE JEANS 60"
+  },
+  {
+    "codigo": "15136483",
+    "descricao": "CALCA NYLON EMBORRACHADO IMPERMEAVEL G"
+  },
+  {
+    "codigo": "15136482",
+    "descricao": "CALCA NYLON EMBORRACHADO IMPERMEAVEL GG"
+  },
+  {
+    "codigo": "15136484",
+    "descricao": "CALCA NYLON EMBORRACHADO IMPERMEAVEL M"
+  },
+  {
+    "codigo": "15136485",
+    "descricao": "CALCA NYLON EMBORRACHADO IMPERMEAVEL P"
+  },
+  {
+    "codigo": "15055904",
+    "descricao": "CALCA PIJAMA RASPA 46"
+  },
+  {
+    "codigo": "15132681",
+    "descricao": "CALCA PIJAMA RASPA 50"
+  },
+  {
+    "codigo": "15135989",
+    "descricao": "CALCA PIJAMA RASPA 52"
+  },
+  {
+    "codigo": "15136131",
+    "descricao": "CALCA PIJAMA VAQUETA 46"
+  },
+  {
+    "codigo": "15136132",
+    "descricao": "CALCA PIJAMA VAQUETA 50"
+  },
+  {
+    "codigo": "15136133",
+    "descricao": "CALCA PIJAMA VAQUETA 54"
+  },
+  {
+    "codigo": "15131761",
+    "descricao": "CALCA UNIFOR FEMININA JEANS COS ALTO 36"
+  },
+  {
+    "codigo": "15131762",
+    "descricao": "CALCA UNIFOR FEMININA JEANS COS ALTO 38"
+  },
+  {
+    "codigo": "15131763",
+    "descricao": "CALCA UNIFOR FEMININA JEANS COS ALTO 40"
+  },
+  {
+    "codigo": "15131765",
+    "descricao": "CALCA UNIFOR FEMININA JEANS COS ALTO 42"
+  },
+  {
+    "codigo": "15131764",
+    "descricao": "CALCA UNIFOR FEMININA JEANS COS ALTO 44"
+  },
+  {
+    "codigo": "15131767",
+    "descricao": "CALCA UNIFOR FEMININA JEANS COS ALTO 46"
+  },
+  {
+    "codigo": "15131766",
+    "descricao": "CALCA UNIFOR FEMININA JEANS COS ALTO 48"
+  },
+  {
+    "codigo": "15131769",
+    "descricao": "CALCA UNIFOR FEMININA JEANS COS ALTO 50"
+  },
+  {
+    "codigo": "15131771",
+    "descricao": "CALCA UNIFOR FEMININA JEANS COS ALTO 52"
+  },
+  {
+    "codigo": "15131770",
+    "descricao": "CALCA UNIFOR FEMININA JEANS COS ALTO 54"
+  },
+  {
+    "codigo": "15131775",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 36"
+  },
+  {
+    "codigo": "15131776",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 38"
+  },
+  {
+    "codigo": "15131777",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 40"
+  },
+  {
+    "codigo": "15131778",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 42"
+  },
+  {
+    "codigo": "15131779",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 44"
+  },
+  {
+    "codigo": "15131780",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 46"
+  },
+  {
+    "codigo": "15131782",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 48"
+  },
+  {
+    "codigo": "15131781",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 50"
+  },
+  {
+    "codigo": "15131783",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 52"
+  },
+  {
+    "codigo": "15131784",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 54"
+  },
+  {
+    "codigo": "15131785",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 56"
+  },
+  {
+    "codigo": "15131786",
+    "descricao": "CALCA UNIFORME MASCULINA JEANS 58"
+  },
+  {
+    "codigo": "15131742",
+    "descricao": "CAMISA BATA GESTANTE ALGODAO CINZA G"
+  },
+  {
+    "codigo": "15131743",
+    "descricao": "CAMISA BATA GESTANTE ALGODAO CINZA GG"
+  },
+  {
+    "codigo": "15131741",
+    "descricao": "CAMISA BATA GESTANTE ALGODAO CINZA M"
+  },
+  {
+    "codigo": "15131740",
+    "descricao": "CAMISA BATA GESTANTE ALGODAO CINZA P"
+  },
+  {
+    "codigo": "15131744",
+    "descricao": "CAMISA BATA GESTANTE ALGODAO CINZA XG"
+  },
+  {
+    "codigo": "15134519",
+    "descricao": "CAMISA ELETRICISTA RISCO 2 EXG"
+  },
+  {
+    "codigo": "15132663",
+    "descricao": "CAMISA ELETRICISTA RISCO 2 G"
+  },
+  {
+    "codigo": "15124764",
+    "descricao": "CAMISA ELETRICISTA RISCO 2 GG"
+  },
+  {
+    "codigo": "15101271",
+    "descricao": "CAMISA ELETRICISTA RISCO 2 M"
+  },
+  {
+    "codigo": "15101272",
+    "descricao": "CAMISA ELETRICISTA RISCO 2 P"
+  },
+  {
+    "codigo": "15101273",
+    "descricao": "CAMISA ELETRICISTA RISCO 2 XG"
+  },
+  {
+    "codigo": "15131735",
+    "descricao": "CAMISA FEM MC ALGODAO FAIXA REFLET G"
+  },
+  {
+    "codigo": "15131737",
+    "descricao": "CAMISA FEM MC ALGODAO FAIXA REFLET GG"
+  },
+  {
+    "codigo": "15131732",
+    "descricao": "CAMISA FEM MC ALGODAO FAIXA REFLET M"
+  },
+  {
+    "codigo": "15131731",
+    "descricao": "CAMISA FEM MC ALGODAO FAIXA REFLET P"
+  },
+  {
+    "codigo": "15131690",
+    "descricao": "CAMISA FEM MC ALGODAO FAIXA REFLET PP"
+  },
+  {
+    "codigo": "15131738",
+    "descricao": "CAMISA FEM MC ALGODAO FAIXA REFLET XG"
+  },
+  {
+    "codigo": "15135585",
+    "descricao": "CAMISA MASC MC ALGODAO CINZA G"
+  },
+  {
+    "codigo": "15135010",
+    "descricao": "CAMISA MASC MC ALGODAO CINZA M"
+  },
+  {
+    "codigo": "15132028",
+    "descricao": "CAMISA MASC MC ALGODAO FAIXA REFLET EXG"
+  },
+  {
+    "codigo": "15131725",
+    "descricao": "CAMISA MASC MC ALGODAO FAIXA REFLET G"
+  },
+  {
+    "codigo": "15131726",
+    "descricao": "CAMISA MASC MC ALGODAO FAIXA REFLET GG"
+  },
+  {
+    "codigo": "15131724",
+    "descricao": "CAMISA MASC MC ALGODAO FAIXA REFLET M"
+  },
+  {
+    "codigo": "15131723",
+    "descricao": "CAMISA MASC MC ALGODAO FAIXA REFLET P"
+  },
+  {
+    "codigo": "15131727",
+    "descricao": "CAMISA MASC MC ALGODAO FAIXA REFLET XG"
+  },
+  {
+    "codigo": "15131711",
+    "descricao": "CAMISA MASC ML ALGODAO CINZA G"
+  },
+  {
+    "codigo": "15131716",
+    "descricao": "CAMISA MASC ML ALGODAO CINZA M"
+  },
+  {
+    "codigo": "15136447",
+    "descricao": "CAPA 10C012212 3/4\" LATAO OXICORTE"
+  },
+  {
+    "codigo": "15136420",
+    "descricao": "CAPA 10C01225 5/6\" LATAO OXICORTE"
+  },
+  {
+    "codigo": "15016654",
+    "descricao": "CAPA CHUVA AMARELA NR 54"
+  },
+  {
+    "codigo": "15097417",
+    "descricao": "CAPA CURTA TOCHA TIG OXIMIG TF500"
+  },
+  {
+    "codigo": "15049802",
+    "descricao": "CAPA LONGA LONGA TOCHA TIG SU26"
+  },
+  {
+    "codigo": "15119717",
+    "descricao": "CAPA PROTETORA FE 0215 P/ CABO SOLDA M*"
+  },
+  {
+    "codigo": "15125364",
+    "descricao": "CAPACETE SEG AMARELA POLIETIL"
+  },
+  {
+    "codigo": "15135267",
+    "descricao": "CAPACETE SEG AZUL POLIETILENO"
+  },
+  {
+    "codigo": "15131602",
+    "descricao": "CAPACETE SEG BRANCA POLIETILENO"
+  },
+  {
+    "codigo": "15098602",
+    "descricao": "CAPACETE SEG BRIGADISTA VERMELHA"
+  },
+  {
+    "codigo": "15135775",
+    "descricao": "CAPACETE SEG VERDE POLIETILENO"
+  },
+  {
+    "codigo": "15075783",
+    "descricao": "CAPUZ SEG M ANTICHAMA HIGIEN BRIM"
+  },
+  {
+    "codigo": "15136119",
+    "descricao": "CAPUZ SEG UNICO ARAMIDA  ALUMINIZADO"
+  },
+  {
+    "codigo": "15088348",
+    "descricao": "CAPUZ SEG UNICO BALACLAVA ANTICHAMA"
+  },
+  {
+    "codigo": "15097468",
+    "descricao": "CARNEIRA POLIETILENO COM JUGULAR MSA"
+  },
+  {
+    "codigo": "15125848",
+    "descricao": "CHAVE CATRACA 7/8\""
+  },
+  {
+    "codigo": "15124413",
+    "descricao": "CINTA PLANA 1,5M PES VERDE 2000 KGF"
+  },
+  {
+    "codigo": "15115254",
+    "descricao": "CINTA PLANA 2M PES AMARELA 3000 KGF"
+  },
+  {
+    "codigo": "15100513",
+    "descricao": "CINTA PLANA 2M PES VERDE 2000 KGF"
+  },
+  {
+    "codigo": "15098970",
+    "descricao": "CINTA PLANA 3M PES AMARELA 3000 KGF"
+  },
+  {
+    "codigo": "15128024",
+    "descricao": "CINTA PLANA 4M PES AMARELA 3000 KGF"
+  },
+  {
+    "codigo": "15115251",
+    "descricao": "CINTA PLANA 6M PES VERMELHA 5000 KGF"
+  },
+  {
+    "codigo": "15065879",
+    "descricao": "CINTO MONTADOR ANDAIME"
+  },
+  {
+    "codigo": "15067396",
+    "descricao": "CINTO SEG PARAQUEDISTA"
+  },
+  {
+    "codigo": "15105425",
+    "descricao": "CINTURAO PARAQUEDISTA PARA-ARAMIDA TAM*"
+  },
+  {
+    "codigo": "15136224",
+    "descricao": "COLETE SEG HORA DIRIGIDA ALGODAO EXG"
+  },
+  {
+    "codigo": "15136222",
+    "descricao": "COLETE SEG HORA DIRIGIDA ALGODAO G"
+  },
+  {
+    "codigo": "15136223",
+    "descricao": "COLETE SEG HORA DIRIGIDA ALGODAO GG"
+  },
+  {
+    "codigo": "15136221",
+    "descricao": "COLETE SEG HORA DIRIGIDA ALGODAO M"
+  },
+  {
+    "codigo": "15078101",
+    "descricao": "COLETE SEG REFLETIVO X PVC LARAN/CINZA*"
+  },
+  {
+    "codigo": "15132688",
+    "descricao": "COLETE SEG SEGURANCA POLIESTER VERDE R*"
+  },
+  {
+    "codigo": "15103293",
+    "descricao": "COMP LIMPEZA PASTA LIMP 900G"
+  },
+  {
+    "codigo": "15105714",
+    "descricao": "COMP PROT BASE PROT 5L"
+  },
+  {
+    "codigo": "15132714",
+    "descricao": "COMPOSTO DESENGRIPANTE 300ML DESENGRIP"
+  },
+  {
+    "codigo": "15125724",
+    "descricao": "COMPOSTO DESENGRIPANTE 300ML PECAS"
+  },
+  {
+    "codigo": "15128545",
+    "descricao": "CONECTOR EMENDA 70 MM2"
+  },
+  {
+    "codigo": "15131264",
+    "descricao": "CONECTOR ENGATE RAPIDO ESPIGAO 3/4\" FE*"
+  },
+  {
+    "codigo": "15043680",
+    "descricao": "CONECTOR FEMEA 0100463 CG-01 500A"
+  },
+  {
+    "codigo": "15043594",
+    "descricao": "CONECTOR MACHO 0100464 CG-02 500A"
+  },
+  {
+    "codigo": "15105343",
+    "descricao": "COPO DESCARTAVEL 200 ML"
+  },
+  {
+    "codigo": "15087534",
+    "descricao": "CORDA 1/2\" TRANCADA POLIPROPILENO BRANCA"
+  },
+  {
+    "codigo": "15135113",
+    "descricao": "CORDA 3,00 MM TRANCADA POLIESTER BRANCA"
+  },
+  {
+    "codigo": "15136016",
+    "descricao": "CORPO FIXADOR 0600-2029 TOCHA"
+  },
+  {
+    "codigo": "15052291",
+    "descricao": "CORPO FIXADOR FIXADOR 3/32IN TOCHA TIG*"
+  },
+  {
+    "codigo": "15130370",
+    "descricao": "CORRENTE ELO D4,00 X14 X24MM ACO DIN 766"
+  },
+  {
+    "codigo": "15048778",
+    "descricao": "CORRENTE ELO X35 X63MM PLASTICO"
+  },
+  {
+    "codigo": "15128844",
+    "descricao": "CREME LOCAO 200G REPELENTE"
+  },
+  {
+    "codigo": "15076110",
+    "descricao": "CREME PROTECAO 200G GP 3"
+  },
+  {
+    "codigo": "15065208",
+    "descricao": "CREME PROTECAO FPS 30 120G BLOQ SOLAR"
+  },
+  {
+    "codigo": "15130997",
+    "descricao": "DIFUSOR GAS TOCHA SU-320/520/620"
+  },
+  {
+    "codigo": "15128879",
+    "descricao": "DISCO CORTE 1,00MM FURO 22,20MM D 114,*"
+  },
+  {
+    "codigo": "15127573",
+    "descricao": "DISCO CORTE 1,60MM FURO 22,20MM D 177,*"
+  },
+  {
+    "codigo": "15062584",
+    "descricao": "DISCO CORTE 3,00MM FURO 22,00MM D 114,*"
+  },
+  {
+    "codigo": "15127198",
+    "descricao": "DISCO CORTE 3,00MM FURO 22,20MM D 177,*"
+  },
+  {
+    "codigo": "15056622",
+    "descricao": "DISCO DESBASTE FURO 22,00MM D 114,30MM"
+  },
+  {
+    "codigo": "15062589",
+    "descricao": "DISCO DESBASTE FURO 22,22MM D 114,30MM"
+  },
+  {
+    "codigo": "15116254",
+    "descricao": "DISCO DESBASTE FURO 22,22MM D 115,00MM"
+  },
+  {
+    "codigo": "15067580",
+    "descricao": "DISCO DESBASTE FURO 22,22MM D 180,00MM"
+  },
+  {
+    "codigo": "15135648",
+    "descricao": "DISCO DESBASTE FURO 22,23 MM D 178,00MM"
+  },
+  {
+    "codigo": "15076003",
+    "descricao": "ELEMENTO FILTRO CARTUCHO CARVAO ATIV"
+  },
+  {
+    "codigo": "15078208",
+    "descricao": "ELETRODO GRAF CORTE 9,50MM S/ ENCAIXE"
+  },
+  {
+    "codigo": "15118173",
+    "descricao": "ELETRODO SOLDA 2,50MM AWS E7018-1-H4R *"
+  },
+  {
+    "codigo": "15123647",
+    "descricao": "ELETRODO SOLDA 3,25MM AWS E7018 AWS A5*"
+  },
+  {
+    "codigo": "15135367",
+    "descricao": "ELETRODO SOLDA 4,00MM AWS A5.1/ASME SF*"
+  },
+  {
+    "codigo": "15081114",
+    "descricao": "ELETRODO SOLDA 6,35MM ESPECIAL (GRAFIT*"
+  },
+  {
+    "codigo": "15128207",
+    "descricao": "ELETRODO TUNGSTENIO 2,40MM AWS EWTH-2"
+  },
+  {
+    "codigo": "15105943",
+    "descricao": "ELETRODO TUNGSTENIO 3,20MM"
+  },
+  {
+    "codigo": "15103851",
+    "descricao": "ENVELOPE PAPEL KRAFT 185,0X250,0 MM PA*"
+  },
+  {
+    "codigo": "15105801",
+    "descricao": "ENVELOPE PAPEL KRAFT 223,0X330,0 MM PA*"
+  },
+  {
+    "codigo": "15128728",
+    "descricao": "ESCOVA LIMPEZA MANUAL 10X20MM P SOLDADOR"
+  },
+  {
+    "codigo": "15114434",
+    "descricao": "ESCOVA LIMPEZA ROTATIVA 4 1/2 X 1/4 X *"
+  },
+  {
+    "codigo": "15135245",
+    "descricao": "ESCOVA LIMPEZA ROTATIVA ACABAMENTO SUP*"
+  },
+  {
+    "codigo": "15086824",
+    "descricao": "ESPATULA"
+  },
+  {
+    "codigo": "15012272",
+    "descricao": "ESQUADRO LISO ACO"
+  },
+  {
+    "codigo": "15048095",
+    "descricao": "ETIQUETA 115,00 MM PLASTICO VD"
+  },
+  {
+    "codigo": "15048094",
+    "descricao": "ETIQUETA 115,00 MM PLASTICO VM"
+  },
+  {
+    "codigo": "15135024",
+    "descricao": "FILTRO  2078 VAPOR ORGANICO RESPIR 7200S"
+  },
+  {
+    "codigo": "15076574",
+    "descricao": "FILTRO  6001 VAPOR ORGANICO RESPIR 7200S"
+  },
+  {
+    "codigo": "15099520",
+    "descricao": "FILTRO ALTA EFICIENCIA P3 5N11 RESP7500"
+  },
+  {
+    "codigo": "15131372",
+    "descricao": "FILTRO CARTUCHO MULTIGAS RESP 6006"
+  },
+  {
+    "codigo": "15131224",
+    "descricao": "FITA ADESIVA PAPEL CREPADO CREME 48,00*"
+  },
+  {
+    "codigo": "15046946",
+    "descricao": "FITA ADESIVA/DUREX FILME INCOLOR 50 MM"
+  },
+  {
+    "codigo": "15112697",
+    "descricao": "FITA ISOLANT BORRACHA AUTOFUSAO PT 19M*"
+  },
+  {
+    "codigo": "15098768",
+    "descricao": "FITA ISOLANT PLASTICO AM 19MM 20M"
+  },
+  {
+    "codigo": "15105978",
+    "descricao": "FITA ISOLANT PLASTICO AZ 19MM 20M"
+  },
+  {
+    "codigo": "15116705",
+    "descricao": "FITA ISOLANT PLASTICO BR 19MM 20M"
+  },
+  {
+    "codigo": "15129340",
+    "descricao": "FITA ISOLANT PLASTICO VM 19MM 20M"
+  },
+  {
+    "codigo": "15131838",
+    "descricao": "FITA ISOLANT PVC PT 19MM 20M"
+  },
+  {
+    "codigo": "15135266",
+    "descricao": "GUIA ESPIRAL SU595 / SU695"
+  },
+  {
+    "codigo": "15136343",
+    "descricao": "HASTE CONJUNTO HPT/12 FIXAR TELHADO"
+  },
+  {
+    "codigo": "15122966",
+    "descricao": "KIT HIGIENE PROT CONCHA 3M H6B"
+  },
+  {
+    "codigo": "15135132",
+    "descricao": "KIT HIGIENE PROT CONCHA MSA XLS"
+  },
+  {
+    "codigo": "15078848",
+    "descricao": "LAMINA SERRA MANUAL E0,65MM L13MM 300MM"
+  },
+  {
+    "codigo": "15128483",
+    "descricao": "LANT ELET PEQ LED ESPECIAL ALUM RECARR*"
+  },
+  {
+    "codigo": "15066864",
+    "descricao": "LENTE INCOLOR VIDRO D 50,00MM"
+  },
+  {
+    "codigo": "15132664",
+    "descricao": "LENTE INCOLOR VIDRO MASC SOLD 50X105,5MM"
+  },
+  {
+    "codigo": "15115480",
+    "descricao": "LENTE MASCARA SOLDA VERDE TON  6"
+  },
+  {
+    "codigo": "15020447",
+    "descricao": "LENTE MASCARA SOLDA VERDE TON 10"
+  },
+  {
+    "codigo": "15001056",
+    "descricao": "LENTE MASCARA SOLDA VERDE TON 12"
+  },
+  {
+    "codigo": "15136000",
+    "descricao": "LENTE PROTETOR FACIAL MSA"
+  },
+  {
+    "codigo": "15126390",
+    "descricao": "LENTE TONALIDADE 4 OCULOS SOLDADOR"
+  },
+  {
+    "codigo": "15099987",
+    "descricao": "LIMA ROTATIVA METAL DURO 12,00MM 65,00*"
+  },
+  {
+    "codigo": "15106546",
+    "descricao": "LIMA ROTATIVA METAL DURO 16,00MM 65,00*"
+  },
+  {
+    "codigo": "15064441",
+    "descricao": "LIQUIDO PENETRANTE VERMEL 300ML"
+  },
+  {
+    "codigo": "15127766",
+    "descricao": "LIXA PANO OXIDO ALUMINIO FOLHA 100"
+  },
+  {
+    "codigo": "15121020",
+    "descricao": "LIXA PANO OXIDO ALUMINIO FOLHA 120"
+  },
+  {
+    "codigo": "15126744",
+    "descricao": "LIXA PANO OXIDO ALUMINIO FOLHA 40"
+  },
+  {
+    "codigo": "15001000",
+    "descricao": "LIXA PANO OXIDO ALUMINIO FOLHA 60"
+  },
+  {
+    "codigo": "15136523",
+    "descricao": "LUVA SEG ANTICORTE POLIESTER 10"
+  },
+  {
+    "codigo": "15126263",
+    "descricao": "LUVA SEG ANTICORTE POLIETILENO 10"
+  },
+  {
+    "codigo": "15114770",
+    "descricao": "LUVA SEG ANTIVIBRACAO M"
+  },
+  {
+    "codigo": "15096765",
+    "descricao": "LUVA SEG BORRACHA NITRILICA 9"
+  },
+  {
+    "codigo": "15132685",
+    "descricao": "LUVA SEG CAMURCA TRAT 10 PUNHO 200MM"
+  },
+  {
+    "codigo": "15087480",
+    "descricao": "LUVA SEG ELETRICISTA VAQUETA PUNHO 200MM"
+  },
+  {
+    "codigo": "15128632",
+    "descricao": "LUVA SEG NITRILICA FORRO ALGODAO"
+  },
+  {
+    "codigo": "15130631",
+    "descricao": "LUVA SEG NITRILICO 9 CANO LONGO"
+  },
+  {
+    "codigo": "15136279",
+    "descricao": "LUVA SEG THERMOCOURO PUNHO 200MM VELCRO"
+  },
+  {
+    "codigo": "15117930",
+    "descricao": "LUVA SEG TRICOTADA POLIAMIDA 9"
+  },
+  {
+    "codigo": "15132676",
+    "descricao": "LUVA SEG VAQUETA PUNHO 200 MM"
+  },
+  {
+    "codigo": "15136396",
+    "descricao": "LUVA SEG VAQUETA PUNHO 200 MM"
+  },
+  {
+    "codigo": "15122713",
+    "descricao": "MACACAO POLYBRIM GRAFITE G"
+  },
+  {
+    "codigo": "15122695",
+    "descricao": "MACACAO POLYBRIM GRAFITE GG"
+  },
+  {
+    "codigo": "15122628",
+    "descricao": "MACACAO POLYBRIM GRAFITE M"
+  },
+  {
+    "codigo": "15122692",
+    "descricao": "MACACAO POLYBRIM GRAFITE P"
+  },
+  {
+    "codigo": "15122694",
+    "descricao": "MACACAO POLYBRIM GRAFITE XG"
+  },
+  {
+    "codigo": "15132693",
+    "descricao": "MACACAO TYVEK BRANCA G"
+  },
+  {
+    "codigo": "15122606",
+    "descricao": "MACACAO TYVEK BRANCA GG"
+  },
+  {
+    "codigo": "15103193",
+    "descricao": "MACARICO CORTE ACETILENO/GLP/GN 90G"
+  },
+  {
+    "codigo": "15135007",
+    "descricao": "MANGUEIRA BORRACHA 19,00"
+  },
+  {
+    "codigo": "15126153",
+    "descricao": "MANGUEIRA BORRACHA 7,90"
+  },
+  {
+    "codigo": "15125908",
+    "descricao": "MANGUEIRA BORRACHA 7,90 VERD/VERM"
+  },
+  {
+    "codigo": "15134934",
+    "descricao": "MANGUEIRA LED MG2F-LED13-VD-50-2"
+  },
+  {
+    "codigo": "15103343",
+    "descricao": "MANILHA UNIAO CURVA ACO FORJ GR 6 12T"
+  },
+  {
+    "codigo": "15123099",
+    "descricao": "MANILHA UNIAO CURVA ACO FORJ GR 6 3,25T"
+  },
+  {
+    "codigo": "15124063",
+    "descricao": "MANILHA UNIAO CURVA ACO FORJ GR 6 4,75T"
+  },
+  {
+    "codigo": "15093138",
+    "descricao": "MANILHA UNIAO CURVA ACO FORJ GR 6 6,3T"
+  },
+  {
+    "codigo": "15047986",
+    "descricao": "MARCADOR CHAPAS MARCACAO METALICA AMAR*"
+  },
+  {
+    "codigo": "15090319",
+    "descricao": "MARCADOR CHAPAS MARCACAO METALICA BRAN*"
+  },
+  {
+    "codigo": "15129041",
+    "descricao": "MARCADOR CHAPAS MARCACAO VERMELHA ESFE*"
+  },
+  {
+    "codigo": "15113353",
+    "descricao": "MARTELO PICADEIRA MAN MOLA"
+  },
+  {
+    "codigo": "15131490",
+    "descricao": "MASCARA SEG FACIAL POEIRAS/NEVOAS/FUMOS"
+  },
+  {
+    "codigo": "15116749",
+    "descricao": "MASCARA SEG SEMI-FACIAL"
+  },
+  {
+    "codigo": "15076535",
+    "descricao": "MASCARA SEG SEMI-FACIAL DOBRAVEL PFF2"
+  },
+  {
+    "codigo": "15135865",
+    "descricao": "MASCARA SEG SOLD POLIPROPIL VISOR FIXO"
+  },
+  {
+    "codigo": "15136419",
+    "descricao": "MOLA 10A017718 MANGUEIRA OXICORTE"
+  },
+  {
+    "codigo": "15129090",
+    "descricao": "OCULOS SEG AMPLA VISAO INCOLOR"
+  },
+  {
+    "codigo": "15133287",
+    "descricao": "OCULOS SEG BASCUL PROPIANATO PRETO"
+  },
+  {
+    "codigo": "15068845",
+    "descricao": "OCULOS SEG BORRACHA SOLDADOR/MACARIQUEI"
+  },
+  {
+    "codigo": "15136566",
+    "descricao": "OCULOS SEG LENTE CINZA USO GERAL"
+  },
+  {
+    "codigo": "15135294",
+    "descricao": "OCULOS SEG LENTE INCOLOR USO GERAL"
+  },
+  {
+    "codigo": "15135510",
+    "descricao": "OCULOS SEG SOBREPOR POLICARB INCOL"
+  },
+  {
+    "codigo": "15117554",
+    "descricao": "PANO TRAPO COST BRANCA"
+  },
+  {
+    "codigo": "15135387",
+    "descricao": "PAPEL TOALHA AZUL"
+  },
+  {
+    "codigo": "15127018",
+    "descricao": "PARAF CAB CIL NC 1/4\" CL12.9 C25MM ASM*"
+  },
+  {
+    "codigo": "15134012",
+    "descricao": "PARAF SEXT ACO BAIXO CARBONO 5,50 C38M*"
+  },
+  {
+    "codigo": "15135799",
+    "descricao": "PARAF SEXT ACO BAIXO CARBONO 5,50 C38MM"
+  },
+  {
+    "codigo": "15124711",
+    "descricao": "PARAF SEXT ACO BAIXO CARBONO 6,30 C22M*"
+  },
+  {
+    "codigo": "15136300",
+    "descricao": "PARAF SEXT GR2 NC 1/2\" C76MM B18.2.1"
+  },
+  {
+    "codigo": "15136299",
+    "descricao": "PARAF SEXT GR2 NC 5/8\" C76MM B18.2.1"
+  },
+  {
+    "codigo": "15125091",
+    "descricao": "PEDRA 012259012 CENTELHADOR ACENDEDOR"
+  },
+  {
+    "codigo": "15131171",
+    "descricao": "PERNEIRA SEG ESCARFADOR RASPA 360 MM"
+  },
+  {
+    "codigo": "15076538",
+    "descricao": "PERNEIRA SEG LONA IMPERMEAVEL 10"
+  },
+  {
+    "codigo": "15132674",
+    "descricao": "PERNEIRA SEG RASPA 260 MM"
+  },
+  {
+    "codigo": "15068668",
+    "descricao": "PINCA  TOCHA TIG 3,2MM SU26"
+  },
+  {
+    "codigo": "15015541",
+    "descricao": "PINCA TOCHA TIG 2,4MM"
+  },
+  {
+    "codigo": "15126145",
+    "descricao": "PLASTICO FILME STRETCH L500,00MM"
+  },
+  {
+    "codigo": "15128892",
+    "descricao": "PONTA MONTADA A11 OXIDO ALUMINIO"
+  },
+  {
+    "codigo": "15136285",
+    "descricao": "PORCA SEXT NC 1/2\" GALV ASME B18.2.2"
+  },
+  {
+    "codigo": "15133683",
+    "descricao": "PORCA SEXT NC 5/8\" GALV ASME B18.2.2"
+  },
+  {
+    "codigo": "15135103",
+    "descricao": "PORTA BOCAL  M8 MB 406"
+  },
+  {
+    "codigo": "15130955",
+    "descricao": "PORTA ELETRODO CORTE 600A ELET D 3/8\""
+  },
+  {
+    "codigo": "15131818",
+    "descricao": "PORTA ELETRODO SOLDA 500-600A ISOLADO *"
+  },
+  {
+    "codigo": "15126509",
+    "descricao": "PREGO 17X21 CHATA ACO POLIDO"
+  },
+  {
+    "codigo": "15005776",
+    "descricao": "PREGO 18X30 CHATA ACO POLIDO"
+  },
+  {
+    "codigo": "15130356",
+    "descricao": "PRESILHA PES ACO FORJ SAE1045 CABO ACO*"
+  },
+  {
+    "codigo": "15130481",
+    "descricao": "PROTETOR AUDITIVO CONCHA CAPACETE 20DB"
+  },
+  {
+    "codigo": "15132659",
+    "descricao": "PROTETOR AUDITIVO CONCHA HASTE NUCA 19DB"
+  },
+  {
+    "codigo": "15132657",
+    "descricao": "PROTETOR AUDITIVO PLUG SILICONE UNICO"
+  },
+  {
+    "codigo": "15088938",
+    "descricao": "PROTETOR FACIAL POLICARB INCOL MSA 1MM"
+  },
+  {
+    "codigo": "15099284",
+    "descricao": "PULVERIZADOR PLASTICO"
+  },
+  {
+    "codigo": "15062685",
+    "descricao": "PUNCAO BELZER"
+  },
+  {
+    "codigo": "15093545",
+    "descricao": "REGULADOR PRES ACET 1,5KGF"
+  },
+  {
+    "codigo": "15068563",
+    "descricao": "REGULADOR PRES ARG"
+  },
+  {
+    "codigo": "15087357",
+    "descricao": "REGULADOR PRES CO2"
+  },
+  {
+    "codigo": "15134894",
+    "descricao": "REGULADOR PRES GLP NPT1/2\" 1KGF"
+  },
+  {
+    "codigo": "15135668",
+    "descricao": "REGULADOR PRES GLP ROS 4BAR"
+  },
+  {
+    "codigo": "15129220",
+    "descricao": "REGULADOR PRES OXIG KGF/CM2 PSI. ABNT *"
+  },
+  {
+    "codigo": "15112760",
+    "descricao": "REGULADOR PRES OXIG W21,8 X 14FPP 8,5KGF"
+  },
+  {
+    "codigo": "15117722",
+    "descricao": "RETENTOR 501 FILTRO RESPIRADOR 7500"
+  },
+  {
+    "codigo": "15124905",
+    "descricao": "REVELADOR LIQ BRANCA 300ML DET DEFEITO"
+  },
+  {
+    "codigo": "15119078",
+    "descricao": "RISCADOR ACO METAL DURO WIDIA"
+  },
+  {
+    "codigo": "15136280",
+    "descricao": "SAPATILHA CABO DE ACO GALV CABO ACO 3/8\""
+  },
+  {
+    "codigo": "15000383",
+    "descricao": "SERRA COPO 60,00MM"
+  },
+  {
+    "codigo": "15077627",
+    "descricao": "SERRA COPO ACO 19,00MM"
+  },
+  {
+    "codigo": "15077641",
+    "descricao": "SERRA COPO ACO 27,00MM"
+  },
+  {
+    "codigo": "15014984",
+    "descricao": "SERRA COPO ACO 51,00MM"
+  },
+  {
+    "codigo": "15128816",
+    "descricao": "SERRA COPO ACO 76,00MM"
+  },
+  {
+    "codigo": "15107650",
+    "descricao": "SERRA COPO ACO 89,00MM"
+  },
+  {
+    "codigo": "15077617",
+    "descricao": "SERRA COPO D 102,0MM"
+  },
+  {
+    "codigo": "15129267",
+    "descricao": "SILICONE SPRAY 350G ANTI-RESPINGO"
+  },
+  {
+    "codigo": "15087624",
+    "descricao": "SUPORTE  A1 STARRET SERRA COPO 14A30MM"
+  },
+  {
+    "codigo": "15067281",
+    "descricao": "TALABARTE Y"
+  },
+  {
+    "codigo": "15103775",
+    "descricao": "TALABARTE Y 1300MM PARA-ARAMIDA"
+  },
+  {
+    "codigo": "15129270",
+    "descricao": "TECIDO FIBRA ARAMIDA 1200,00 MM 750 G/*"
+  },
+  {
+    "codigo": "15131005",
+    "descricao": "TELA L 1500,00 MM X C 50000,00 MM 0,56*"
+  },
+  {
+    "codigo": "15127305",
+    "descricao": "TERM CABO ELET COMPR 70MM2 10,5MM"
+  },
+  {
+    "codigo": "15070957",
+    "descricao": "TERMINAL COMPRESSAO 120,00MM2 1 FUROS"
+  },
+  {
+    "codigo": "15135112",
+    "descricao": "TERMINAL GRAMPO TERRA"
+  },
+  {
+    "codigo": "15135566",
+    "descricao": "TERMINAL MANG LATAO ESPIGAO/ESPIGAO"
+  },
+  {
+    "codigo": "15136421",
+    "descricao": "TERMINAL MANG LATAO NF 9/16\""
+  },
+  {
+    "codigo": "15136446",
+    "descricao": "TERMINAL MANG LATAO NF 9/16\""
+  },
+  {
+    "codigo": "15100724",
+    "descricao": "TOCHA SOLDA MIG/MAG 1,20 A 1,60 MM"
+  },
+  {
+    "codigo": "15088921",
+    "descricao": "TOCHA SOLDA TIG 1,60 A 4,00 MM"
+  },
+  {
+    "codigo": "15122532",
+    "descricao": "TRAVA QUEDA 1500 KG 6000,00 MM"
+  },
+  {
+    "codigo": "15040267",
+    "descricao": "TUBO CONTATO 1,2MM TOCHA SOLDA"
+  },
+  {
+    "codigo": "15128912",
+    "descricao": "TUBO CONTATO 9001316 TOCHA MIG"
+  },
+  {
+    "codigo": "15117676",
+    "descricao": "VALV COR-CHA ACET MA-FE 9/16\"X18UNF-RH*"
+  },
+  {
+    "codigo": "15092755",
+    "descricao": "VALV COR-CHA OXIG 9/16\"X18UNF-RH MACAR*"
+  },
+  {
+    "codigo": "15133046",
+    "descricao": "VALV COR-CHA OXIG 9/16\"X18UNF-RH REGUL*"
+  },
+  {
+    "codigo": "15126577",
+    "descricao": "VALVULA CORTA CHAMA VSCR-GC-40123792 R*"
+  },
+  {
+    "codigo": "15130250",
+    "descricao": "VARETA SOLDA 2,40MM AWS ER308L AWS A5.*"
+  },
+  {
+    "codigo": "15098596",
+    "descricao": "VARETA SOLDA 2,50MM AWS ER70S-3"
+  },
+  {
+    "codigo": "15101981",
+    "descricao": "VARETA SOLDA 3,20MM AWS ER308L AWS A5.*"
+  },
+  {
+    "codigo": "15100503",
+    "descricao": "VARETA SOLDA 3,25MM AWS ER309L AWS A5.*"
+  },
+  {
+    "codigo": "15124772",
+    "descricao": "VARETA SOLDA AWS ER70S-3 AWS A5.18/ASM*"
+  },
+  {
+    "codigo": "15129117",
+    "descricao": "VASSOURA COMUM PIACAVA"
+  }
+];
+    let selecionados = {};
+
+    function mostrarMensagem(elemento, texto, tipo) {
+      elemento.textContent = texto;
+      elemento.className = "aviso " + tipo;
+      elemento.style.display = "block";
+
+      setTimeout(() => {
+        elemento.style.display = "none";
+      }, 5000);
+    }
+
+    function normalizarTexto(texto) {
+      return texto
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toUpperCase()
+        .trim();
+    }
+
+    function renderizarMateriais() {
+      const container = document.getElementById("listaMateriais");
+      const pesquisa = normalizarTexto(
+        document.getElementById("pesquisa").value
+      );
+      const filtro = document.getElementById("filtro").value;
+
+      let lista = materiais.filter(material => {
+        const texto = normalizarTexto(
+          material.codigo + " " + material.descricao
+        );
+
+        const correspondePesquisa = texto.includes(pesquisa);
+        const correspondeFiltro =
+          filtro === "todos" || selecionados[material.codigo];
+
+        return correspondePesquisa && correspondeFiltro;
+      });
+
+      if (lista.length === 0) {
+        container.innerHTML = `
+          <div class="vazio">
+            Nenhum material encontrado.
+          </div>
+        `;
+      } else {
+        container.innerHTML = lista.map(material => {
+          const marcado = !!selecionados[material.codigo];
+          const quantidade = selecionados[material.codigo]?.quantidade || 1;
+
+          return `
+            <div class="item">
+              <label class="checkbox-area" aria-label="Selecionar ${escapeHtml(material.descricao)}">
+                <input
+                  class="material-checkbox"
+                  type="checkbox"
+                  data-codigo="${material.codigo}"
+                  ${marcado ? "checked" : ""}
+                >
+              </label>
+
+              <div class="codigo">${material.codigo}</div>
+
+              <div class="descricao">${escapeHtml(material.descricao)}</div>
+
+              <input
+                class="quantidade"
+                type="number"
+                min="1"
+                value="${quantidade}"
+                ${marcado ? "" : "disabled"}
+                data-codigo="${material.codigo}"
+                title="Quantidade"
+              >
+            </div>
+          `;
+        }).join("");
+      }
+
+      const total = Object.keys(selecionados).length;
+
+      document.getElementById("contador").textContent =
+        total + " material(is) selecionado(s) de " + materiais.length;
+
+      atualizarPreview();
+    }
+
+    function alternarMaterial(codigo, marcado) {
+      const material = materiais.find(item => item.codigo === codigo);
+      if (!material) return;
+
+      if (marcado) {
+        selecionados[codigo] = {
+          codigo: material.codigo,
+          descricao: material.descricao,
+          quantidade: 1
+        };
+      } else {
+        delete selecionados[codigo];
+      }
+
+      atualizarPreview();
+      atualizarContador();
+    }
+
+    function atualizarContador() {
+      const total = Object.keys(selecionados).length;
+      document.getElementById("contador").textContent =
+        total + " material(is) selecionado(s) de " + materiais.length;
+    }
+
+    function alterarQuantidade(codigo, quantidade) {
+      if (!selecionados[codigo]) return;
+
+      const numero = parseInt(quantidade, 10);
+
+      selecionados[codigo].quantidade =
+        Number.isFinite(numero) && numero > 0 ? numero : 1;
+
+      atualizarPreview();
+    }
+
+    function gerarMensagem() {
+      const solicitante =
+        document.getElementById("solicitante").value.trim() ||
+        "Não informado";
+
+      const setor =
+        document.getElementById("setor").value.trim() ||
+        "Não informado";
+
+      const observacao =
+        document.getElementById("observacao").value.trim() ||
+        "Nenhuma";
+
+      const itens = Object.values(selecionados);
+
+      let mensagem =
+`REQUISIÇÃO DE MATERIAIS - ALMOXARIFADO
+
+Solicitante: ${solicitante}
+Setor: ${setor}
+
+Materiais solicitados:
+`;
+
+      if (itens.length === 0) {
+        mensagem += "\nNenhum material selecionado.\n";
+      } else {
+        itens.forEach((item) => {
+          mensagem +=
+`\n${item.codigo} - ${item.descricao} - Quantidade: ${item.quantidade}`;
+        });
+      }
+
+      mensagem +=
+`
+Observação:
+${observacao}
+
+Data: ${new Date().toLocaleDateString("pt-BR")}`;
+
+      return mensagem;
+    }
+
+    function atualizarPreview() {
+      document.getElementById("preview").textContent = gerarMensagem();
+    }
+
+    function enviarWhatsApp() {
+      const itens = Object.values(selecionados);
+
+      if (itens.length === 0) {
+        mostrarMensagem(
+          document.getElementById("mensagemEnvio"),
+          "Selecione pelo menos um material.",
+          "erro"
+        );
+        return;
+      }
+
+      const telefone = document
+        .getElementById("telefone")
+        .value
+        .replace(/\D/g, "");
+
+      if (!telefone) {
+        mostrarMensagem(
+          document.getElementById("mensagemEnvio"),
+          "Informe o número do WhatsApp do almoxarifado.",
+          "erro"
+        );
+        return;
+      }
+
+      const mensagem = gerarMensagem();
+      const url =
+        "https://wa.me/" +
+        telefone +
+        "?text=" +
+        encodeURIComponent(mensagem);
+
+      window.open(url, "_blank");
+    }
+
+    async function copiarMensagem() {
+      const mensagem = gerarMensagem();
+
+      try {
+        await navigator.clipboard.writeText(mensagem);
+
+        mostrarMensagem(
+          document.getElementById("mensagemEnvio"),
+          "Mensagem copiada com sucesso.",
+          "sucesso"
+        );
+      } catch {
+        mostrarMensagem(
+          document.getElementById("mensagemEnvio"),
+          "Não foi possível copiar automaticamente.",
+          "erro"
+        );
+      }
+    }
+
+    function escapeHtml(texto) {
+      return texto
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    document
+      .getElementById("solicitante")
+      .addEventListener("input", atualizarPreview);
+
+    document
+      .getElementById("setor")
+      .addEventListener("input", atualizarPreview);
+
+    document
+      .getElementById("observacao")
+      .addEventListener("input", atualizarPreview);
+
+    // Compatibilidade iPhone/iPad: eventos nativos e delegados.
+    document.getElementById("listaMateriais").addEventListener("change", function (event) {
+      const alvo = event.target;
+
+      if (alvo.matches(".material-checkbox")) {
+        alternarMaterial(alvo.dataset.codigo, alvo.checked);
+
+        const quantidade = document.querySelector(
+          '.quantidade[data-codigo="' + alvo.dataset.codigo + '"]'
+        );
+        if (quantidade) {
+          quantidade.disabled = !alvo.checked;
+        }
+      }
+
+      if (alvo.matches(".quantidade")) {
+        alterarQuantidade(alvo.dataset.codigo, alvo.value);
+      }
+    });
+
+    renderizarMateriais();
+    atualizarContador();
+  </script>
+</body>
+</html>
