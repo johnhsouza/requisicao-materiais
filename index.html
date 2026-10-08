@@ -6530,42 +6530,40 @@ Data: --/--/----</div>
 
 
     function gerarMensagem() {
-      const solicitanteEl = document.getElementById("solicitante");
-      const setorEl = document.getElementById("setor");
-      const observacaoEl = document.getElementById("observacao");
+      const solicitante = (document.getElementById("solicitante")?.value || "").trim();
+      const setor = (document.getElementById("setor")?.value || "").trim();
+      const observacao = (document.getElementById("observacao")?.value || "").trim();
 
-      const solicitante = solicitanteEl ? solicitanteEl.value.trim() : "";
-      const setor = setorEl ? setorEl.value.trim() : "";
-      const observacao = observacaoEl ? observacaoEl.value.trim() : "";
+      const itens = [];
+      document.querySelectorAll('#listaMateriais input[type="checkbox"]:checked').forEach(function(cb) {
+        const item = cb.closest(".item");
+        if (!item) return;
 
-      const itens = Object.values(selecionados);
+        const codigo = item.querySelector(".codigo")?.textContent.trim() || "";
+        const descricao = item.querySelector(".descricao")?.textContent.trim() || "";
+
+        if (codigo || descricao) {
+          itens.push((codigo ? codigo + " - " : "") + descricao);
+        }
+      });
 
       let mensagem =
-`REQUISIÇÃO DE MATERIAIS - ALMOXARIFADO
+        "REQUISIÇÃO DE MATERIAIS - ALMOXARIFADO\n\n" +
+        "Solicitante: " + (solicitante || "Não informado") + "\n" +
+        "Setor: " + (setor || "Não informado") + "\n\n" +
+        "Materiais solicitados:\n";
 
-Solicitante: ${solicitante || "Não informado"}
-Setor: ${setor || "Não informado"}
-
-Materiais solicitados:
-`;
-
-      if (itens.length === 0) {
-        mensagem += `
-Nenhum material selecionado.
-`;
+      if (itens.length) {
+        mensagem += "\n" + itens.join("\n") + "\n";
       } else {
-        itens.forEach(item => {
-          mensagem += `
-${item.codigo} - ${item.descricao}`;
-        });
-        mensagem += "\n";
+        mensagem += "\nNenhum material selecionado.\n";
       }
 
-      mensagem += `
-Observação:
-${observacao || "Nenhuma"}
-
-Data: ${new Date().toLocaleDateString("pt-BR")}`;
+      mensagem +=
+        "\nObservação:\n" +
+        (observacao || "Nenhuma") +
+        "\n\nData: " +
+        new Date().toLocaleDateString("pt-BR");
 
       return mensagem;
     }
