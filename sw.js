@@ -1,4 +1,4 @@
-const CACHE = "requisicao-materiais-v5";
+const CACHE = "requisicao-materiais-v6";
 const ASSETS = [
   "./",
   "./index.html",
