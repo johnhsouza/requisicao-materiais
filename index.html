@@ -290,12 +290,12 @@
       <div class="grid">
         <div>
           <label for="solicitante">Solicitante</label>
-          <input id="solicitante" placeholder="Nome do solicitante">
+          <input id="solicitante" placeholder="Nome do solicitante" oninput="atualizarPreview()">
         </div>
 
         <div>
           <label for="setor">Setor / Ferramentaria</label>
-          <input id="setor" placeholder="Ex.: Ferramentaria Sinterização">
+          <input id="setor" placeholder="Ex.: Ferramentaria Sinterização" oninput="atualizarPreview()">
         </div>
 
         <div>
@@ -303,7 +303,7 @@
       </div>
 
       <label for="observacao">Observação</label>
-      <textarea id="observacao" placeholder="Digite alguma observação, se necessário..."></textarea>
+      <textarea id="observacao" placeholder="Digite alguma observação, se necessário..." oninput="atualizarPreview()"></textarea>
     </section>
 
     <section class="card">
@@ -1426,6 +1426,7 @@ Data: ${new Date().toLocaleDateString("pt-BR")}`;
                 type="checkbox"
                 data-codigo="${escapeHtml(material.codigo)}"
                 ${marcado ? "checked" : ""}
+                onchange="alternarMaterial(this.getAttribute('data-codigo'), this.checked)"
                 aria-label="Selecionar ${escapeHtml(material.descricao)}">
               <div class="codigo">${escapeHtml(material.codigo)}</div>
               <div class="descricao">${escapeHtml(material.descricao)}</div>
@@ -1473,16 +1474,6 @@ Data: ${new Date().toLocaleDateString("pt-BR")}`;
     ["solicitante", "setor", "observacao"].forEach(function(id) {
       document.getElementById(id).addEventListener("input", atualizarPreview);
       document.getElementById(id).addEventListener("change", atualizarPreview);
-    });
-
-    // Evento delegado: continua funcionando mesmo quando a lista é filtrada/recriada.
-    document.getElementById("listaMateriais").addEventListener("change", function(event) {
-      if (event.target.classList.contains("material-checkbox")) {
-        alternarMaterial(
-          event.target.getAttribute("data-codigo"),
-          event.target.checked
-        );
-      }
     });
 
     document.getElementById("pesquisa").addEventListener("input", renderizarMateriais);

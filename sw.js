@@ -1,4 +1,4 @@
-const CACHE = "requisicao-materiais-v4";
+const CACHE = "requisicao-materiais-v5";
 const ASSETS = [
   "./",
   "./index.html",
@@ -27,6 +27,21 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
+
+  // Always try the current online index first. If offline, use the cached copy.
+  if (event.request.mode === "navigate" ||
+      new URL(event.request.url).pathname.endsWith("/index.html")) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          const copy = response.clone();
+          caches.open(CACHE).then(cache => cache.put("./index.html", copy));
+          return response;
+        })
+        .catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(cached => {
