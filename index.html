@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Requisição de Materiais</title>
-  <meta name="format-detection" content="telephone=no">
-
+  
   <style>
     * {
       box-sizing: border-box;
@@ -143,7 +142,7 @@
 
     .item {
       display: grid;
-      grid-template-columns: 42px 120px 1fr 100px;
+      grid-template-columns: 42px 120px 1fr auto;
       gap: 10px;
       align-items: center;
       padding: 12px;
@@ -216,6 +215,70 @@
       text-transform: uppercase;
     }
 
+    .btn-imagem {
+      background: #eef7f1;
+      color: #087f40;
+      border: 1px solid #b8d7c4;
+      border-radius: 7px;
+      padding: 8px 10px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .modal-imagem {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.62);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 9999;
+    }
+
+    .modal-imagem.aberto { display: flex; }
+
+    .modal-conteudo {
+      position: relative;
+      width: min(720px, 100%);
+      max-height: 94vh;
+      overflow: auto;
+      background: white;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 10px 40px rgba(0,0,0,.35);
+      text-align: center;
+    }
+
+    .modal-fechar {
+      position: absolute;
+      right: 10px;
+      top: 8px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      color: #111827;
+      font-size: 24px;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .modal-conteudo img {
+      display: block;
+      width: 100%;
+      max-height: 58vh;
+      object-fit: contain;
+      margin: 26px auto 12px;
+      border: 1px solid #d7dfda;
+      border-radius: 10px;
+      background: #f7f8f8;
+    }
+
+    .modal-titulo { font-size: 17px; font-weight: bold; color: #087f40; margin: 4px 45px 5px; }
+    .modal-codigo { font-size: 13px; color: #6b7280; }
+    .modal-nota { font-size: 12px; color: #6b7280; margin-top: 8px; }
+
     .preview {
       white-space: pre-wrap;
       background: #f7faf8;
@@ -282,8 +345,19 @@
 <body>
   <header>
     <h1>Requisição de Materiais</h1>
-    <p>Marque os materiais necessários e envie a requisição pelo WhatsApp</p>
+    <p>Marque os materiais necessários e confira a requisição</p>
   </header>
+
+
+  <div id="modalImagem" class="modal-imagem" role="dialog" aria-modal="true" aria-label="Imagem do material">
+    <div class="modal-conteudo" onclick="event.stopPropagation()">
+      <button class="modal-fechar" onclick="fecharImagem()" aria-label="Fechar">×</button>
+      <div id="modalTitulo" class="modal-titulo"></div>
+      <div id="modalCodigo" class="modal-codigo"></div>
+      <img id="modalImg" alt="Imagem técnica do material">
+      <div class="modal-nota">Representação técnica para identificação visual. Confirme sempre código e especificação antes da retirada.</div>
+    </div>
+  </div>
 
   <main>
 
@@ -1434,12 +1508,31 @@ Data: ${new Date().toLocaleDateString("pt-BR")}`;
                 aria-label="Selecionar ${escapeHtml(material.descricao)}">
               <div class="codigo">${escapeHtml(material.codigo)}</div>
               <div class="descricao">${escapeHtml(material.descricao)}</div>
+              <button type="button" class="btn-imagem" onclick="abrirImagem('${escapeHtml(material.codigo)}')">📷 Ver imagem</button>
             </div>`;
         }).join("");
       }
 
       atualizarContador();
       atualizarPreview();
+    }
+
+    function abrirImagem(codigo) {
+      const material = materiais.find(function(item) { return item.codigo === codigo; });
+      if (!material) return;
+      document.getElementById("modalTitulo").textContent = material.descricao;
+      document.getElementById("modalCodigo").textContent = "Código: " + material.codigo;
+      const img = document.getElementById("modalImg");
+      img.src = "images/" + material.codigo + ".webp";
+      img.alt = material.codigo + " - " + material.descricao;
+      document.getElementById("modalImagem").classList.add("aberto");
+      document.body.style.overflow = "hidden";
+    }
+
+    function fecharImagem() {
+      document.getElementById("modalImagem").classList.remove("aberto");
+      document.getElementById("modalImg").removeAttribute("src");
+      document.body.style.overflow = "";
     }
 
     function mostrarMensagem(texto, tipo) {
@@ -1492,5 +1585,9 @@ Data: ${new Date().toLocaleDateString("pt-BR")}`;
       });
     }
   </script>
+<script>
+    document.getElementById("modalImagem").addEventListener("click", fecharImagem);
+    document.addEventListener("keydown", function(event) { if (event.key === "Escape") fecharImagem(); });
+</script>
 </body>
 </html>
